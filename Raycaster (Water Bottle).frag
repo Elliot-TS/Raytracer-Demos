@@ -1,3 +1,5 @@
+// Taken from https://www.shadertoy.com/view/wsByWD
+// See live demo there
 #define MAX_STEPS 1000
 #define MAX_DIST 1000.
 #define SURF_DIST .001
