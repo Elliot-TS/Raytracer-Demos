@@ -21,6 +21,6 @@ Folding space in on itself to create a water bottle
 
 https://www.khanacademy.org/computer-programming/ray-tracer/5975635851100160
 
-![Path Tracer Demo](https://github.com/RingOfProgrammers/Raytracer-Demos/blob/main/Path%20Tracing%20Demo.png)
+![Path Tracer Demo](https://github.com/RingOfProgrammers/Raytracer-Demos/blob/main/Path%20Tracer%20Demo.png)
 
 Trying out path tracing
