@@ -1,4 +1,4 @@
-// Taken from https://www.khanacademy.org/computer-programming/path-tracer/5975635851100160
+// Code taken from https://www.khanacademy.org/computer-programming/path-tracer/5975635851100160
 // See link for live demo
 var normalize = function (v) {
     var m = 1/sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
@@ -41,7 +41,7 @@ var castRay = function (ox,oy,oz, dx,dy,dz) {
         my = 1/dy,
         mz = 1/dz;
     
-    var s = 10;
+    var s = 5;
     // y-facing walls
     var dw = (s-oy)*my;
     if (dw > 0.01) { d = dw; ny = -1; INTERSECTION_ID = 0; }
@@ -62,10 +62,10 @@ var castRay = function (ox,oy,oz, dx,dy,dz) {
     
     // Sphere
     var radius = 3.1;
-    var sx = 1,
-        sy = 1.4,
-        sz = 0,
-        sr = 0.4;
+    var sx = 4.6,
+        sy = 3.5,
+        sz = 4,
+        sr = 0.7;
     
     var a = 1;
     var b = (2*ox*dx - 2*dx*sx) +
@@ -86,12 +86,12 @@ var castRay = function (ox,oy,oz, dx,dy,dz) {
         // If one of them is in front of the ray's origin
         if (t0 >= 0 || t1 >= 0) {
             INTERSECTION_ID = 6;
-            if (t0 < 0) { d = t0; }
-            else if (t0 < 0) { d = t1; }
+            if (t0 < 0) { d = t1; }
+            else if (t1 < 0) { d = t0; }
             else { d = (t0 < t1) ? t0 : t1; }
             
             // The normal is the sphere's origin minus the intersection point
-            nx = ((ox + dx*d) - sx) / sr ;
+            nx = ((ox + dx*d) - sx) / sr;
             ny = ((oy + dy*d) - sy) / sr; 
             nz = ((oz + dz*d) - sz) / sr;
         }
@@ -122,7 +122,7 @@ var render = function (ro, rd, rec) {
     
     // The default material is a gray diffuse color
     var mat = [0.4, 0.4, 0.4];
-    if (INTERSECTION_ID === 5) { return [2,2,2]; } // ceiling
+    if (INTERSECTION_ID === 5) { return [10,10,10]; } // ceiling
     if (INTERSECTION_ID === 4 || INTERSECTION_ID === 1) { mat = [0.9,0.2,0.2]; } // red walls
     else if (INTERSECTION_ID === 3 || INTERSECTION_ID === 2) { mat = [0.2,0.9,0.2]; } // green walls
     
@@ -136,7 +136,7 @@ var render = function (ro, rd, rec) {
     
     // If the ray hits the box, 
     if (INTERSECTION_ID === 6) {
-        mat = [0.9, 0.9, 0.9];
+        mat = [2,2,2];
         // Dot product of normal and light ray
         var dott =  d[1]*rd[0] +
                     d[2]*rd[1] +
@@ -150,12 +150,13 @@ var render = function (ro, rd, rec) {
         ];
     }
     else {
+        // Pick a random ray direciton
         nrd = normalize([random(-1,1), random(-1,1), random(-1,1)]);
-        nrd = [
-            (d[1]+nrd[0]) / 2,
-            (d[2]+nrd[1]) / 2,
-            (d[3]+nrd[2]) / 2
-        ];
+        // If the angle it makes with the normal is more than 90 degrees, invert the ray direciton
+        if (nrd[0]*d[1] + nrd[1]*d[2] + nrd[2]*d[3] < 0) {
+            nrd = [-nrd[0], -nrd[1], -nrd[2]];
+        }
+        
     }
     nrd = normalize(nrd);
     
@@ -177,18 +178,20 @@ var render = function (ro, rd, rec) {
 
 var img = createGraphics(width,height, P2D);
 img.background(0);
-var samples = 0;
+var samples = 1;
+img.loadPixels();
+var p = img.imageData.data;
+var sum_pixels = []; // stores sum of images
+p.forEach(function(e){sum_pixels.push(0);});
+var plen = p.length;
 draw = function() {
-    img.loadPixels();
-    var p = img.imageData.data;
-    var plen = p.length;
     
     var i, x,y;
     var rd, col, v;
     
-    var cam = [0.2,0.7,-0.1];
-    var lookat = [1,1,0];
-    var zoom = 0.7;
+    var cam = [4.1,0.7,3.2];
+    var lookat = [4.5,4,3.8];
+    var zoom = 1;
     
     var fra = (samples-1)/samples;
     var frb = 1/samples;
@@ -200,9 +203,17 @@ draw = function() {
         rd = getRay(x,y, cam[0],cam[1],cam[2], lookat[0],lookat[1],lookat[2], zoom);
         col = render(cam, rd);
         
-        v = p[i+0]; v = (v*fra + frb*col[0]*255); p[i+0] = v+0.5;
-        v = p[i+1]; v = (v*fra + frb*col[1]*255); p[i+1] = v+0.5;
-        v = p[i+2]; v = (v*fra + frb*col[2]*255); p[i+2] = v+0.5;
+        sum_pixels[i+0] += col[0];
+        sum_pixels[i+1] += col[1];
+        sum_pixels[i+2] += col[2];
+        
+        p[i+0] = 255*sum_pixels[i+0] / samples;
+        p[i+1] = 255*sum_pixels[i+1] / samples;
+        p[i+2] = 255*sum_pixels[i+2] / samples;
+        
+        //v = p[i+0]; v = (v*fra + frb*col[0]*255); p[i+0] = v+0.5;
+        //v = p[i+1]; v = (v*fra + frb*col[1]*255); p[i+1] = v+0.5;
+        //v = p[i+2]; v = (v*fra + frb*col[2]*255); p[i+2] = v+0.5;
         
     }
     
