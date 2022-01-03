@@ -1,5 +1,5 @@
-// Taken from https://www.khanacademy.org/computer-programming/ray-tracer/5975635851100160
-// See life demo there.
+// Taken from https://www.khanacademy.org/computer-programming/path-tracer/5975635851100160
+// See link for live demo
 var normalize = function (v) {
     var m = 1/sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
     return [v[0]*m, v[1]*m, v[2]*m];
@@ -60,37 +60,41 @@ var castRay = function (ox,oy,oz, dx,dy,dz) {
     dw = -(s+oz)*mz;
     if (dw > 0.01 && dw < d) { d = dw; nz = 1; ny = 0; nx = 0; INTERSECTION_ID = 5; }
     
-    // Box
-    ox += 3;
-    oy -= 4;
-    oz -= 3;
-    var boxSizeX = 1.5,
-        boxSizeY = 2,
-        boxSizeZ = 1;
-    var nnx = mx*ox,
-        nny = my*oy,
-        nnz = mz*oz;
-    var kx = Math.abs(mx)*boxSizeX,
-        ky = Math.abs(my)*boxSizeY,
-        kz = Math.abs(mz)*boxSizeZ;
-    var t1x = -nnx - kx,
-        t1y = -nny - ky,
-        t1z = -nnz - kz;
-    var t2x = -nnx + kx,
-        t2y = -nny + ky,
-        t2z = -nnz + kz;
-    var tN = max( max( t1x, t1y ), t1z );
-    var tF = min( min( t2x, t2y ), t2z );
-    if (!(tN > tF || tF < 0)) {
-        d = min(d, tN);
-        d = min(d, tF);
-        INTERSECTION_ID = 6;
-        nx = 0;
-        ny = 0;
-        nz = 0;
-        if (t1x > t1y && t1x > t1z) { nx = 1; }
-        else if (t1y > t1z) { ny = -1; }
-        else { nz = -1; }
+    // Sphere
+    var radius = 3.1;
+    var sx = 1,
+        sy = 1.4,
+        sz = 0,
+        sr = 0.4;
+    
+    var a = 1;
+    var b = (2*ox*dx - 2*dx*sx) +
+            (2*oy*dy - 2*dy*sy) +
+            (2*oz*dz - 2*dz*sz);
+    var c = (ox*ox - 2*ox*sx + sx*sx) +
+            (oy*oy - 2*oy*sy + sy*sy) +
+            (oz*oz - 2*oz*sz + sz*sz) -
+            sr*sr;
+    var rash = b*b - 4*a*c;
+    
+    if (rash >= 0) {
+        // t is the parametric position along the ray where there's an intersection
+        // t0 and t1 are both solutions for t
+        var t0 = (-b + sqrt(rash)) / (2*a);
+        var t1 = (-b - sqrt(rash)) / (2*a);
+        
+        // If one of them is in front of the ray's origin
+        if (t0 >= 0 || t1 >= 0) {
+            INTERSECTION_ID = 6;
+            if (t0 < 0) { d = t0; }
+            else if (t0 < 0) { d = t1; }
+            else { d = (t0 < t1) ? t0 : t1; }
+            
+            // The normal is the sphere's origin minus the intersection point
+            nx = ((ox + dx*d) - sx) / sr ;
+            ny = ((oy + dy*d) - sy) / sr; 
+            nz = ((oz + dz*d) - sz) / sr;
+        }
     }
     
     return [abs(d), nx,ny,nz];
@@ -109,31 +113,40 @@ var getRay = function (x,y, cx,cy,cz, lx,ly,lz, z) {
 };
 
 var render = function (ro, rd, rec) {
-    rec = rec === undefined ? 5 : rec;
+    rec = rec === undefined ? 7 : rec;
     
     if (rec <= 0) { return [0,0,0]; }
     
+    // castRay returns [distance, normal_x, normal_y, normal_z]
     var d = castRay(ro[0],ro[1],ro[2], rd[0],rd[1],rd[2]);
     
+    // The default material is a gray diffuse color
     var mat = [0.4, 0.4, 0.4];
-    if (INTERSECTION_ID === 5) { return [6,6,6]; }
-    if (INTERSECTION_ID === 4 || INTERSECTION_ID === 1) { mat = [0.9,0.2,0.2]; }
-    else if (INTERSECTION_ID === 3 || INTERSECTION_ID === 2) { mat = [0.2,0.9,0.2]; }
+    if (INTERSECTION_ID === 5) { return [2,2,2]; } // ceiling
+    if (INTERSECTION_ID === 4 || INTERSECTION_ID === 1) { mat = [0.9,0.2,0.2]; } // red walls
+    else if (INTERSECTION_ID === 3 || INTERSECTION_ID === 2) { mat = [0.2,0.9,0.2]; } // green walls
     
+    // New Ray Orgin (at intersection point)
     var nro = [
         ro[0] + rd[0]*d[0],
         ro[1] + rd[1]*d[0],
         ro[2] + rd[2]*d[0]
     ];
-    var nrd;
-    // Make sure the ray is never going into the surface by finding the midray between the normal and the random ray
+    var nrd; // new ray direction
+    
+    // If the ray hits the box, 
     if (INTERSECTION_ID === 6) {
         mat = [0.9, 0.9, 0.9];
-        var dott = rd[0]*d[1] + rd[1]*d[2] + rd[2]*d[3];
+        // Dot product of normal and light ray
+        var dott =  d[1]*rd[0] +
+                    d[2]*rd[1] +
+                    d[3]*rd[2];
+        dott *= -2;
+        // Get the reflected ray direciton
         nrd = [
-            rd[0] - 2*dott*d[1],
-            rd[1] - 2*dott*d[2],
-            rd[2] - 2*dott*d[3]
+            dott * d[1] + rd[0],
+            dott * d[2] + rd[1],
+            dott * d[3] - rd[2]
         ];
     }
     else {
@@ -146,9 +159,12 @@ var render = function (ro, rd, rec) {
     }
     nrd = normalize(nrd);
     
+    // dot product of the normal and the new ray direction.
+    // if the dot product is <= 0, the ray goes backward into
+    // the surface (or parallel to the surface)
     var dt = d[1]*nrd[0] + d[2]*nrd[1] + d[3]*nrd[2];
-    
     if (dt <= 0) { return [0,0,0]; }
+    
     var c = render(nro, nrd, rec - 1);
     var d2 = dt;
     
@@ -170,9 +186,9 @@ draw = function() {
     var i, x,y;
     var rd, col, v;
     
-    var cam = [0.3,-1,0];
-    var lookat = [0,0,0];
-    var zoom = 1;
+    var cam = [0.2,0.7,-0.1];
+    var lookat = [1,1,0];
+    var zoom = 0.7;
     
     var fra = (samples-1)/samples;
     var frb = 1/samples;
