@@ -2,7 +2,7 @@
 * Taken from https://www.khanacademy.org/computer-programming/raycaster-3d/6164665312018432
 * See there for live demo
 ***********************************/
-/** CREDIT TO: https://www.khanacademy.org/computer-programming/raycasting-3d-test-iiii/6592431021948928 */
+/** This is a derivative work of: https://www.khanacademy.org/computer-programming/raycasting-3d-test-iiii/6592431021948928 */
 
 // SET UP
 var _KEYS = {};
