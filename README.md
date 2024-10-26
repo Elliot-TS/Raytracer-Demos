@@ -4,6 +4,8 @@ Demo Ray marchers, Ray tracers, and Path tracers that I've made in order to lear
 ## Textured Raycaster
 https://www.khanacademy.org/computer-programming/raycaster-3d/6164665312018432
 
+(Note, due to an error in saving the project on KhanAcademy, you will have to copy the code from [Textured Raycaster.js](https://raw.githubusercontent.com/Elliot-TS/Raytracer-Demos/refs/heads/main/Textured%20Raycaster.js) into the project for it to run properly.  WASD to move and look around)
+
 ![Textured Raycaster Image](https://github.com/Elliot-TS/Raytracer-Demos/blob/main/Textured%20Raycaster.png)
 
 Raycasting is a technique for using a 2D map to create a fake-3D environment by performing ray casting in 2D to display what a 2D character would see in the map, and then each point on the 2D view is extended vertically according to how far away the wall is.  This creates an easy 3D effect, but it is limited in that the environment can only contain walls laid out on a 2D grid, and the player cannot look up or down.
