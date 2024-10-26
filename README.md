@@ -4,14 +4,14 @@ Demo Ray marchers, Ray tracers, and Path tracers that I've made in order to lear
 ## Textured Raycaster
 https://www.khanacademy.org/computer-programming/raycaster-3d/6164665312018432
 
-![Textured Raycaster Image](https://github.com/Elliot-TS/Raytracer-Demos/blob/main/Textured$20Raycaster.png)
+![Textured Raycaster Image](https://github.com/Elliot-TS/Raytracer-Demos/blob/main/Textured%20Raycaster.png)
 
 Raycasting is a technique for using a 2D map to create a fake-3D environment by performing ray casting in 2D to display what a 2D character would see in the map, and then each point on the 2D view is extended vertically according to how far away the wall is.  This creates an easy 3D effect, but it is limited in that the environment can only contain walls laid out on a 2D grid, and the player cannot look up or down.
 
 ## Voxel Raycaster
 https://www.khanacademy.org/computer-programming/voxel-engine/5457174184394752
 
-![Voxel Raycaster Image](https://github.com/Elliot-TS/Raytracer-Demos/blob/main/Voxel$20Raycaster.png)
+![Voxel Raycaster Image](https://github.com/Elliot-TS/Raytracer-Demos/blob/main/Voxel%20Raycaster.png)
 
 After learning about raycasting, I wondered if it was possible to extend the same algorithm to a truely 3D voxel map.  Turns out, you can!
 
